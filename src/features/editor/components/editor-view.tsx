@@ -5,7 +5,7 @@ import FileBreadcrumbs from "./file-breadcrumbs"
 import TopNavigation from "./top-navigation"
 import Image from "next/image"
 import CodeEditor from "./code-editor"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 
 const DEBOUNCE_MS = 1500;
 
@@ -19,6 +19,14 @@ const EditorView = ({ projectId }: {
 
     const isActiveFileBinary = activeFile && activeFile.storageId;
     const isActiveFileText = activeFile && !activeFile.storageId;
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [])
 
     return (
         <div className="h-full flex flex-col">
