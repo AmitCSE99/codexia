@@ -26,7 +26,7 @@ const EditorView = ({ projectId }: {
                 clearTimeout(timeoutRef.current)
             }
         }
-    }, [])
+    }, [activeTabId])
 
     return (
         <div className="h-full flex flex-col">

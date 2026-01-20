@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 import { dark } from "@clerk/themes";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,7 +36,9 @@ export default function RootLayout({
     >
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} ${plexMono.variable} antialiased`}>
-          <Providers>{children}</Providers>
+          <Providers>{children}
+            <Toaster />
+          </Providers>
         </body>
       </html>
     </ClerkProvider>
