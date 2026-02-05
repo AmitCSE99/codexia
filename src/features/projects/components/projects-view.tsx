@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import ProjectsCommandDialog from "./projects-command-dialog";
 import Image from "next/image";
+import { nextJsTemplate, reactViteTemplate } from "../templates";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -82,6 +83,7 @@ export const ProjectsView = () => {
                   });
                   createProject({
                     name: projectName,
+                    template: nextJsTemplate
                   });
                 }}
                 className="h-full items-start justify-start p-4 bg-background border flex flex-col rounded-none"
@@ -96,7 +98,7 @@ export const ProjectsView = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => {}}
+                onClick={() => { }}
                 className="h-full items-start justify-start p-4 bg-background border flex flex-col rounded-none"
               >
                 <div className="flex items-center justify-between w-full">

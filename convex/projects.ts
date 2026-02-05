@@ -1,10 +1,29 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { verifyAuth } from "./auth";
+import { Id } from "./_generated/dataModel";
+
+export type TemplateNode = {
+  type: "file" | "folder",
+  name: string,
+  content?: string,
+  children?: TemplateNode[]
+}
+
+// Validator for TemplateNode (using v.any() for recursive children)
+const templateNodeValidator = v.object({
+  type: v.union(v.literal("file"), v.literal("folder")),
+  name: v.string(),
+  content: v.optional(v.string()),
+  children: v.optional(v.array(v.any())) // Use v.any() for recursive structure
+});
 
 export const create = mutation({
   args: {
     name: v.string(),
+    template: v.optional(
+      v.array(templateNodeValidator)
+    )
   },
   handler: async (ctx, args) => {
     const identity = await verifyAuth(ctx);
@@ -13,6 +32,56 @@ export const create = mutation({
       ownerId: identity.subject,
       updatedAt: Date.now(),
     });
+
+    const createTemplate = async (filesTree: TemplateNode[], parentId?: Id<"files">) => {
+      for (const tree of filesTree) {
+        if (tree.type === "file") {
+          // const files = await ctx.db
+          //   .query("files")
+          //   .withIndex("by_project_parent", (q) => q.eq("projectId", projectId).eq("parentId", parentId))
+          //   .collect();
+          const now = Date.now();
+
+          await ctx.db.insert("files", {
+            projectId: projectId,
+            name: tree.name,
+            content: tree.content,
+            type: "file",
+            parentId: parentId,
+            updatedAt: now
+          })
+
+          await ctx.db.patch("projects", projectId, {
+            updatedAt: now
+          })
+        } else {
+          // const files = await ctx.db
+          //   .query("files")
+          //   .withIndex("by_project_parent", (q) => q.eq("projectId", projectId).eq("parentId", parentId))
+          //   .collect();
+          const now = Date.now();
+
+          const newParentId = await ctx.db.insert("files", {
+            projectId: projectId,
+            name: tree.name,
+            type: "folder",
+            parentId: parentId,
+            updatedAt: now
+          })
+          await ctx.db.patch("projects", projectId, {
+            updatedAt: now
+          });
+
+          if (tree.children && tree.children.length > 0) {
+            await createTemplate(tree.children, newParentId);
+          }
+        }
+      }
+    }
+
+    if (args.template) {
+      await createTemplate(args.template);
+    }
 
     return projectId;
   },
