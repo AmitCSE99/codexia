@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import ProjectsCommandDialog from "./projects-command-dialog";
 import Image from "next/image";
+import { ImportGithubDialog } from "./import-github-dialog";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ const font = Poppins({
 export const ProjectsView = () => {
   const createProject = useCreateProject();
   const [commandDialogOpen, setCommandDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -33,6 +35,11 @@ export const ProjectsView = () => {
         if (e.key === "k") {
           e.preventDefault();
           setCommandDialogOpen(true);
+        }
+
+        if (e.key === "i") {
+          e.preventDefault();
+          setImportDialogOpen(true);
         }
       }
     };
@@ -49,6 +56,7 @@ export const ProjectsView = () => {
         open={commandDialogOpen}
         onOpenChange={setCommandDialogOpen}
       />
+      <ImportGithubDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
       <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-16">
         <div className="w-full max-w-sm mx-auto flex flex-col gap-4 items-center">
           <div className="flex justify-between gap-4 w-full items-center">
@@ -96,7 +104,7 @@ export const ProjectsView = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => {}}
+                onClick={() => { setImportDialogOpen(true) }}
                 className="h-full items-start justify-start p-4 bg-background border flex flex-col rounded-none"
               >
                 <div className="flex items-center justify-between w-full">
