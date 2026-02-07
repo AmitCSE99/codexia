@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { Id } from "../../../../convex/_generated/dataModel"
+import { Doc, Id } from "../../../../convex/_generated/dataModel"
 import { CopyIcon, HistoryIcon, LoaderIcon, PlusIcon } from "lucide-react"
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation"
 import { PromptInput, PromptInputBody, PromptInputFooter, PromptInputMessage, PromptInputSubmit, PromptInputTextarea, PromptInputTools } from "@/components/ai-elements/prompt-input"
 import { useConversation, useConversations, useCreateConversation, useMessages } from "../hooks/use-conversations"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Message, MessageAction, MessageActions, MessageContent, MessageResponse } from "@/components/ai-elements/message"
 import ky from "ky"
@@ -12,13 +12,17 @@ import PastConversationsDialog from "./past-conversations-dialog"
 import { DEFAULT_CONVERSATION_TITLE } from "../constants"
 
 
+type MessageWithOptimistic = Doc<"messages">
+
 const ConversationSidebar = ({ projectId }: {
     projectId: Id<"projects">
 }) => {
     const [pastConversationsOpen, setPastConversationsOpen] = useState(false);
+    const [preSubmitCount, setPreSubmitCount] = useState<number | null>(null);
     const [input, setInput] = useState("")
     const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | null>(null)
     const createConversation = useCreateConversation();
+    const [optimisticMessage, setOptimisticMessage] = useState<MessageWithOptimistic | null>(null);
 
     const conversations = useConversations(projectId);
 
@@ -27,6 +31,13 @@ const ConversationSidebar = ({ projectId }: {
     const activeConversation = useConversation(activeConversationId);
 
     const conversationMessages = useMessages(activeConversationId);
+
+    const serverMessages = conversationMessages ?? [];
+
+    const allMessages = optimisticMessage
+        ? [...serverMessages, optimisticMessage]
+        : serverMessages;
+
 
     const isProcessing = conversationMessages?.some(
         (msg) => msg.status === "processing"
@@ -74,20 +85,48 @@ const ConversationSidebar = ({ projectId }: {
                 return;
             }
         }
+        setPreSubmitCount(serverMessages.length);
+
+        const userText = message.text.trim();
+        if (!userText) return;
+
+        const userId = crypto.randomUUID();
+
+        const optimisticUser: MessageWithOptimistic = {
+            _id: userId as Id<"messages">,
+            role: "user" as const,
+            content: userText,
+            status: "completed" as const,
+            _creationTime: Date.now(),
+            projectId: projectId,
+            conversationId
+        };
+
+        setOptimisticMessage(optimisticUser);
+        setInput("");
 
         try {
             await ky.post("/api/messages", {
                 json: {
                     conversationId,
-                    message: message.text
+                    message: userText
                 }
             })
         } catch {
-            toast.error("Message failed to send!")
+            toast.error("Message failed to send!");
+            setOptimisticMessage(null)
         }
-
-        setInput("");
     }
+
+    useEffect(() => {
+        if (!conversationMessages || !optimisticMessage || preSubmitCount === null) return;
+
+        if (conversationMessages.length > preSubmitCount) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setOptimisticMessage(null);
+            setPreSubmitCount(null);
+        }
+    }, [conversationMessages, optimisticMessage, preSubmitCount]);
 
     return (
         <>
@@ -109,7 +148,7 @@ const ConversationSidebar = ({ projectId }: {
                 <Conversation className="flex-1">
                     <ConversationContent>
                         {
-                            conversationMessages?.map((message, messageIndex) => (
+                            allMessages.map((message, messageIndex) => (
                                 <Message key={message._id} from={message.role}>
                                     <MessageContent>
                                         {
@@ -150,7 +189,7 @@ const ConversationSidebar = ({ projectId }: {
                 <div className="p-3">
                     <PromptInput onSubmit={handleSubmit} className="mt-2">
                         <PromptInputBody>
-                            <PromptInputTextarea placeholder="Ask Codexia anything...." onChange={(e) => { setInput(e.target.value) }} value={input} disabled={isProcessing} />
+                            <PromptInputTextarea placeholder="Ask Codexia anything...." onChange={(e) => { setInput(e.target.value) }} value={input} disabled={isProcessing || !!optimisticMessage} />
                         </PromptInputBody>
                         <PromptInputFooter>
                             <PromptInputTools />
