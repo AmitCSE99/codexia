@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Codexia
 
-## Getting Started
+Codexia is a collaborative AI-first code and project workspace built with Next.js. It combines a modern editor/preview experience with realtime project storage (Convex), background processing (Inngest), and user auth (Clerk). The app provides features for projects, files, AI-assisted conversations, import/export integrations, and WebContainer-based previews.
 
-First, run the development server:
+**Key Features**
+
+- **Projects & Files:** create, edit, preview, and manage files in projects.
+- **AI Conversations:** background processing of messages using Inngest + agent integrations.
+- **Import / Export:** import repos from GitHub and export projects back to GitHub (background jobs).
+- **WebContainer Preview:** run lightweight previews of project code in the browser.
+- **Auth & Realtime:** authentication with Clerk and realtime data with Convex.
+- **Observability:** Sentry configured for client/server error reporting.
+
+**Tech stack**
+
+- **Framework:** Next.js 16 (app router)
+- **Database / Realtime:** Convex
+- **Background jobs:** Inngest (+ agent-kit)
+- **Auth:** Clerk
+- **Observability:** Sentry
+- **Editor / Preview:** CodeMirror, WebContainer, custom UI components
+
+## Getting started
+
+Prerequisites
+
+- Node.js 18+ (recommended)
+- pnpm or npm
+- Convex CLI (if running Convex locally)
+- Inngest CLI (if running Inngest functions locally)
+
+1. Install dependencies
+
+```bash
+npm install
+# or
+pnpm install
+```
+
+2. Environment variables
+
+2. Environment variables
+
+Create a `.env` file in the project root (or copy this example to `.env`) and fill in the values before running the app.
+
+- Public keys (safe to expose to the browser) must be prefixed with `NEXT_PUBLIC_`.
+- Server/internal secrets must NOT be exposed publicly.
+
+Example `.env` (replace placeholder values):
+
+```env
+# Public - Convex client URL (browser-safe)
+NEXT_PUBLIC_CONVEX_URL="https://your-convex-http-url"
+
+# Internal - used by server/background jobs (KEEP SECRET)
+CODEXIA_CONVEX_INTERNAL_KEY="changeme_internal_key"
+
+# Optional: Firecrawl API key
+FIRECRAWL_API_KEY="your_firecrawl_api_key"
+
+# Convex deployment identifier
+CONVEX_DEPLOYMENT="xxxxx"
+
+# Clerk (auth) - set these for user authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_..."
+CLERK_JWT_ISSUER_DOMAIN="https://your-issuer-domain"
+CLERK_SECRET_KEY="sk_live_..."
+
+# Anthropic (AI) API key
+ANTHROPIC_API_KEY="sk_xxxx"
+
+# Sentry (optional) - leave empty to disable
+SENTRY_AUTH_TOKEN=""
+
+# Add any other environment variables referenced in the codebase below.
+```
+
+Tips
+- For browser-exposed variables use the `NEXT_PUBLIC_` prefix.
+- Never commit `.env` to source control; add it to `.gitignore`.
+- To find additional variables search the repo for `process.env.`
+
+3. Run services
+
+- Start the web app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Start Convex (local dev):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run convex:dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Run Inngest functions locally (for background jobs):
 
-## Learn More
+```bash
+npm run inngest:dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+- Convenience: the repository includes a `dev:all` script that runs multiple processes via `mprocs` with dotenv. Use when you have all services configured.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev:all
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Important project routes & files
 
-## Deploy on Vercel
+- **App entry:** [src/app](src/app)
+- **API routes:** [src/app/api](src/app/api)
+- **Inngest functions:** [src/inngest](src/inngest)
+- **Convex server functions & schema:** [convex](convex)
+- **Client Convex helper:** [src/lib/convex-client.ts](src/lib/convex-client.ts)
+- **Providers / Auth:** [src/components/providers.tsx](src/components/providers.tsx)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Development tips
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- When importing/exporting with GitHub the app uses background Inngest functions. Make sure `CODEXIA_CONVEX_INTERNAL_KEY` is set for these flows.
+- Convex-generated client code lives in `convex/_generated` and is used throughout features.
+- Sentry is already configured; set `SENTRY_AUTH_TOKEN` to enable your own project reporting.
+
+## Deploy
+
+This is a standard Next.js app and can be deployed on Vercel or any platform that supports Node.js. Ensure Convex, Inngest, and Clerk configuration are provided in the target environment.
+
+## Contributing
+
+- Open issues and PRs. Keep changes focused and add tests where applicable.
