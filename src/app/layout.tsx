@@ -5,8 +5,8 @@ import "allotment/dist/style.css";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { dark } from "@clerk/themes";
-import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,9 +37,15 @@ export default function RootLayout({
     >
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} ${plexMono.variable} antialiased`}>
-          <Providers>{children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
             <Toaster />
-          </Providers>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

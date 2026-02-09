@@ -8,7 +8,6 @@ import {
   Unauthenticated,
 } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ThemeProvider } from "./theme-provider";
 import { UnauthenticatedView } from "@/features/auth/components/unauthenticated-view";
 import { AuthLoadingView } from "@/features/auth/components/auth-loading-view";
 
@@ -18,20 +17,13 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <ClerkProvider>
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Authenticated>{children}</Authenticated>
-          <Unauthenticated>
-            <UnauthenticatedView />
-          </Unauthenticated>
-          <AuthLoading>
-            <AuthLoadingView />
-          </AuthLoading>
-        </ThemeProvider>
+        <Authenticated>{children}</Authenticated>
+        <Unauthenticated>
+          <UnauthenticatedView />
+        </Unauthenticated>
+        <AuthLoading>
+          <AuthLoadingView />
+        </AuthLoading>
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );

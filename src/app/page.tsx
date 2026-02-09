@@ -1,5 +1,6 @@
-import { ProjectsView } from "@/features/projects/components/projects-view";
-
+import LandingPage from "@/features/landing-page/landing-page";
 export default function Home() {
-  return <ProjectsView />;
+  return (
+    <LandingPage />
+  )
 }

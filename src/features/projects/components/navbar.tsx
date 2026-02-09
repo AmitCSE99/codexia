@@ -61,7 +61,7 @@ const Navbar = ({ projectId }: { projectId: Id<"projects"> }) => {
             <BreadcrumbItem>
               <BreadcrumbLink className="flex items-center gap-1.5" asChild>
                 <Button variant="ghost" className="w-fit! p-1.5! h-7!" asChild>
-                  <Link href={"/"}>
+                  <Link href={"/projects"}>
                     <Image
                       src={"/logo.svg"}
                       alt="logo"
