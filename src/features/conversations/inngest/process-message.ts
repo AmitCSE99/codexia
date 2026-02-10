@@ -128,13 +128,13 @@ export const processMessage = inngest.createFunction(
 
         const codingAgent = createAgent({
             name: "codexia",
-            description: "An expert AI ciding assistant",
+            description: "An expert AI coding assistant",
             system: systemPrompt,
             model: anthropic({
                 model: "claude-opus-4-20250514", // use claude-3-5-haiku-20241022 for less tokens
                 defaultParameters: {
                     temperature: 0.25,
-                    max_tokens: 6000 // use 8000 if using claude-3-5-haiku-20241022
+                    max_tokens: 14000 // use 8000 if using claude-3-5-haiku-20241022
                 },
             }),
             tools: [
@@ -153,7 +153,7 @@ export const processMessage = inngest.createFunction(
         const network = createNetwork({
             name: "codexia-network",
             agents: [codingAgent],
-            maxIter: 8,
+            maxIter: 7,
             router: ({ network }) => {
                 const lastResult = network.state.results.at(-1);
                 const hasTextResponse = lastResult?.output.some((m) => m.type === "text" && m.role === "assistant");
