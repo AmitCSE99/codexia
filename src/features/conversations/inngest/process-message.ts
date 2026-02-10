@@ -133,8 +133,8 @@ export const processMessage = inngest.createFunction(
             model: anthropic({
                 model: "claude-opus-4-20250514", // use claude-3-5-haiku-20241022 for less tokens
                 defaultParameters: {
-                    temperature: 0.3,
-                    max_tokens: 16000 // use 8000 if using claude-3-5-haiku-20241022
+                    temperature: 0.25,
+                    max_tokens: 6000 // use 8000 if using claude-3-5-haiku-20241022
                 },
             }),
             tools: [
@@ -153,7 +153,7 @@ export const processMessage = inngest.createFunction(
         const network = createNetwork({
             name: "codexia-network",
             agents: [codingAgent],
-            maxIter: 20,
+            maxIter: 8,
             router: ({ network }) => {
                 const lastResult = network.state.results.at(-1);
                 const hasTextResponse = lastResult?.output.some((m) => m.type === "text" && m.role === "assistant");
