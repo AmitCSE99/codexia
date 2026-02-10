@@ -153,7 +153,7 @@ export const processMessage = inngest.createFunction(
         const network = createNetwork({
             name: "codexia-network",
             agents: [codingAgent],
-            maxIter: 7,
+            maxIter: 20,
             router: ({ network }) => {
                 const lastResult = network.state.results.at(-1);
                 const hasTextResponse = lastResult?.output.some((m) => m.type === "text" && m.role === "assistant");
